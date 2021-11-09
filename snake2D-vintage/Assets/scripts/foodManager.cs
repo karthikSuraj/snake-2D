@@ -30,4 +30,9 @@ public class foodManager : MonoBehaviour
         transform.position= new Vector3(Random.Range(-10.0f, 10.0f), Random.Range(-4.5f, 4.27f), 0);
         canSpwanFood = true;
     }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        transform.position = new Vector3(Random.Range(-10.0f, 10.0f), Random.Range(-4.5f, 4.27f), 0);
+    }
 }

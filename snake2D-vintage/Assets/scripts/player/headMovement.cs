@@ -82,17 +82,20 @@ public class headMovement : MonoBehaviour
         for(int i = _body.Count-1; i>0 ; i--)
         {
             _body[i].position = _body[i - 1].position;
-       
+            float y = Mathf.Round(_body[i].transform.position.y) - vertical;
+            float x = Mathf.Round(_body[i].transform.position.x) - horizontal;
+            _body[i].transform.position = new Vector3(x, y, 0);
         }
-        
     }
+        
+   
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if(collision.gameObject.GetComponent<foodManager>()!=null)
         {
             Grow();
-          collision.gameObject.transform.position = new Vector3(Random.Range(-10.0f, 10.0f), Random.Range(-4.5f, 4.27f), 0);
+         // collision.gameObject.transform.position = new Vector3(Random.Range(-10.0f, 10.0f), Random.Range(-4.5f, 4.27f), 0);
             foodManager fm = collision.gameObject.GetComponent<foodManager>();
             if(fm.nameOFTheFood== "YellowPepper")
             {
