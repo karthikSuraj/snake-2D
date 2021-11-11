@@ -1,33 +1,66 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using UnityEngine.UI;
+using System;
+using UnityEngine.SceneManagement;
 
 public class headMovement : MonoBehaviour
 {
   public  List<Transform> _body = new List<Transform>();
     public Transform  body;
+    public GameObject gameOver;
+    public Button restart;
     int horizontal = 1;
     int vertical = 0;
-    float speed = 0.005f;
     int score = 0;
+    bool die = false;
+    public TextMeshProUGUI scoreText;
+    public string playerName;
+    public int playerNUmber;
+
+    
    
     // Start is called before the first frame update
     void Start()
     {
-        Time.fixedDeltaTime = 0.05f;
+        Time.fixedDeltaTime = 0.5f;
+        
+    }
+    private void Awake()
+    {
+        
+        restart.onClick.AddListener(RESET);
+        if (playerNUmber == 1)
+            playerName = gameManager.instance.playerONEName; 
+        if (playerNUmber == 2)
+            playerName = gameManager.instance.playertwoName;
+        refreshUI();
+
+    }
+
+    private void RESET()
+    {
+        gameManager.instance.Reset();
+        SceneManager.LoadScene(0);
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        if(!die)
         direction();
     }
     private void FixedUpdate()
     {
-        follower();
-
-        move();
+        if(!die)
+        {
+            follower();
+            move();
+        }
+       
         
 
 
@@ -35,31 +68,65 @@ public class headMovement : MonoBehaviour
 
     void direction()
     {   
-        if (Input.GetKeyDown(KeyCode.W) && horizontal != 0)
+        if(playerNUmber==1)
         {
-            transform.rotation = Quaternion.Euler(0, 0, 90);
-            horizontal = 0;
-            vertical = 1;
-        }
-        else if (Input.GetKeyDown(KeyCode.S) && horizontal != 0)
+            gameManager.instance.playerOneScore = score;
+            if (Input.GetKeyDown(KeyCode.W) && horizontal != 0)
+            {
+                transform.rotation = Quaternion.Euler(0, 0, 90);
+                horizontal = 0;
+                vertical = 1;
+            }
+            else if (Input.GetKeyDown(KeyCode.S) && horizontal != 0)
+            {
+                transform.rotation = Quaternion.Euler(0, 0, -90);
+                horizontal = 0;
+                vertical = -1;
+            }
+            else if (Input.GetKeyDown(KeyCode.A) && vertical != 0)
+            {
+                transform.rotation = Quaternion.Euler(0, 0, 180);
+
+                horizontal = -1;
+                vertical = 0;
+            }
+            else if (Input.GetKeyDown(KeyCode.D) && vertical != 0)
+            {
+                transform.rotation = Quaternion.Euler(0, 0, 0);
+                horizontal = 1;
+                vertical = 0;
+            }
+        }else if(playerNUmber==2)
         {
-            transform.rotation = Quaternion.Euler(0, 0, -90);
-            horizontal = 0;
-            vertical = -1;
+            gameManager.instance.PlayerTwoScore = score;
+            if (Input.GetKeyDown(KeyCode.UpArrow) && horizontal != 0)
+            {
+                transform.rotation = Quaternion.Euler(0, 0, 90);
+                horizontal = 0;
+                vertical = 1;
+            }
+            else if (Input.GetKeyDown(KeyCode.DownArrow) && horizontal != 0)
+            {
+                transform.rotation = Quaternion.Euler(0, 0, -90);
+                horizontal = 0;
+                vertical = -1;
+            }
+            else if (Input.GetKeyDown(KeyCode.LeftArrow) && vertical != 0)
+            {
+                transform.rotation = Quaternion.Euler(0, 0, 180);
+
+                horizontal = -1;
+                vertical = 0;
+            }
+            else if (Input.GetKeyDown(KeyCode.RightArrow) && vertical != 0)
+            {
+                transform.rotation = Quaternion.Euler(0, 0, 0);
+                horizontal = 1;
+                vertical = 0;
+            }
         }
-        else if (Input.GetKeyDown(KeyCode.A) && vertical != 0)
-        {
-            transform.rotation = Quaternion.Euler(0, 0, 180);
-           
-            horizontal = -1;
-            vertical = 0;
-        }
-        else if (Input.GetKeyDown(KeyCode.D) && vertical != 0)
-        {
-            transform.rotation = Quaternion.Euler(0, 0, 0);
-            horizontal = 1;
-            vertical = 0;
-        }
+
+       
         
     }
     void move()
@@ -82,9 +149,9 @@ public class headMovement : MonoBehaviour
         for(int i = _body.Count-1; i>0 ; i--)
         {
             _body[i].position = _body[i - 1].position;
-            float y = Mathf.Round(_body[i].transform.position.y) - vertical;
-            float x = Mathf.Round(_body[i].transform.position.x) - horizontal;
-            _body[i].transform.position = new Vector3(x, y, 0);
+            //float y = Mathf.Round(_body[i].transform.position.y) - vertical;
+            //float x = Mathf.Round(_body[i].transform.position.x) - horizontal;
+            //_body[i].transform.position = new Vector3(x, y, 0);
         }
     }
         
@@ -100,18 +167,35 @@ public class headMovement : MonoBehaviour
             if(fm.nameOFTheFood== "YellowPepper")
             {
                 score += fm.PickUpPoints;
-                Debug.Log(score);
-            } if(fm.nameOFTheFood== "strawBerry")
+                refreshUI();
+               
+            } 
+            if(fm.nameOFTheFood== "strawBerry")
             {
                 score += fm.PickUpPoints;
-                Debug.Log(score);
+                refreshUI();
+
             }
         }
 
 
 
-        if (collision.gameObject.CompareTag("body"))
-            Debug.LogError("die");
+        if (collision.gameObject.CompareTag("body") || (collision.gameObject.CompareTag("walls")))
+        {
+            die = true;
+            if (playerNUmber == 1)
+                gameManager.instance.player1dead = die;
+            else if (playerNUmber == 2)
+                gameManager.instance.player2dead = die;
+
+            gameOver.SetActive(die);
+            gameManager.instance.gameOverDisplay();
+        }
+                                  
+     }
+    void refreshUI()
+    {
+        scoreText.text = playerName +" : "+ score.ToString();
     }
 }
 
